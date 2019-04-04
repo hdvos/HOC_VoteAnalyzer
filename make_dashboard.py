@@ -2,7 +2,6 @@ import os
 import re 
 import datetime
 import pprint as pp
-import numpy as np 
 import networkx as nx
 import tqdm
 
@@ -18,57 +17,6 @@ from dash.dependencies import Input, Output
 party_color_map = {'Labour': '#ff00ff' , 'Deputy Speaker': '#e5e500', 'Speaker': '#ffff00', 'Conservative': '#0000ff', 
                     'Independent': '#ffa500',  'Green Party': '#00cd00', 'Liberal Democrat': '#800080', 
                     'Scottish National Party': '#E56914', 'Democratic Unionist Party' : '#00ffff', 'Plaid Cymru': '#ffffff', 'Sinn F?in': '#000000'}
-# parties = set()
-
-class Voting_Matrix(object):
-    def __init__(self):
-        self.row_index = {}  # mep_name to rownr
-        self.row_index_reversed = {} # rownr to mepname 
-
-        self.col_index = {}    # division_id to colnr
-        self.col_index_reversed = {}   # division to vote_id
-
-        self.M = None
-
-    def generate_matrix(self, voting_history):
-        #first_sweep
-        row_idx = 0
-        col_idx = 0
-
-        for divisionnr, division in sorted(voting_history.divisions.items(), key = lambda x:x[0]):
-            self.col_index[divisionnr] = col_idx
-            self.col_index_reversed[col_idx] = divisionnr
-
-            col_idx += 1
-            for vote_id, vote in division['votes_raw'].items():
-                mep = vote[0].strip('"')
-
-                if not mep in self.row_index.keys():
-                    self.row_index[mep] = row_idx
-                    self.row_index_reversed[row_idx] = mep
-                    row_idx += 1
-        
-        self.M = np.zeros(shape = (len(self.row_index), len(self.col_index)))
-        print(self.M.shape)
-        # second sweep
-        for divisionnr, division in sorted(voting_history.divisions.items(), key = lambda x:x[0]):
-            for vote_id, vote in division['votes_raw'].items():
-                mep = vote[0].strip('"')
-                rownr = self.row_index[mep]
-                colnr = self.col_index[divisionnr]
-
-                if vote[3].strip('"') == 'No':
-                    self.M[rownr, colnr] = -1
-                elif vote[3].strip('"') == 'Aye':
-                    self.M[rownr, colnr] = 1
-                else:
-                    self.M[rownr, colnr] = 0
-
-        print(self.M[:10,:10])
-    
-
-
-    pass
 
 
 
@@ -263,21 +211,8 @@ def visualize(G, remove_empty_nodes = True, layout = "spring"):
         mode='markers',
         hoverinfo='text',
         marker=dict(
-            # showscale=True,
-            # # colorscale options
-            # #'Greys' | 'YlGnBu' | 'Greens' | 'YlOrRd' | 'Bluered' | 'RdBu' |
-            # #'Reds' | 'Blues' | 'Picnic' | 'Rainbow' | 'Portland' | 'Jet' |
-            # #'Hot' | 'Blackbody' | 'Earth' | 'Electric' | 'Viridis' |
-            # colorscale='Viridis',
-            # reversescale=True,
             color=[],
             size=[],
-            # colorbar=dict(
-            #     thickness=15,
-            #     title='Node Connections',
-            #     xanchor='left',
-            #     titleside='right'
-            # ),
             line=dict(width=2)))
 
     for node in tqdm.tqdm(G.nodes()):
@@ -295,7 +230,6 @@ def visualize(G, remove_empty_nodes = True, layout = "spring"):
                 node_trace['marker']['color'] += tuple(['green'])    
             else:
                 node_trace['marker']['color'] += tuple(['red'])       
-            # node_trace['marker']['color'] += tuple([node['aye_count'] - node['noes_count']])     
             node_info = f"Vote: {node['title']} - Ayes count: {node['aye_count']} - Noes count: {node['noes_count']}"
             node_trace['text']+=tuple([node_info])
             node_trace['marker']['size'] += tuple([15])
@@ -305,8 +239,7 @@ def visualize(G, remove_empty_nodes = True, layout = "spring"):
             node_trace['text']+=tuple([node_info])
             node_trace['marker']['size'] += tuple([10])
 
-    # sys.exit(42)
-    # Create Network Graph
+
     print("create network graph ...", flush = True)
 
     fig = go.Figure(data=[edge_trace, node_trace],
@@ -325,18 +258,13 @@ def visualize(G, remove_empty_nodes = True, layout = "spring"):
                 yaxis=dict(showgrid=False, zeroline=False, showticklabels=False)))
     print("returning figure")
     return fig
-    # py.iplot(fig, filename='networkx')
-    # plot(fig)
-
 
 app = dash.Dash()
 
 if __name__ == "__main__":
 
-
-    # mops_index = MembersOfParliamentIndex()
     voting_history = VotingHistory("csv_files")
-    # votingmat = Voting_Matrix()
+
     options = voting_history.get_selection_options()
     print(options)
     app.layout = html.Div(children = [
@@ -363,13 +291,6 @@ if __name__ == "__main__":
             return fig
         except:
             return "Some Error"
-    # votingmat.generate_matrix(voting_history)
 
-    # G, division_nodemap, mp_nodemap = create_network(voting_history, [333, 359, 367, 372, 380])
-    # print(G)
     app.run_server(debug=False)
 
-    # visualize(G)
-    # print(parties)
-    # voting_history.load_divisions()
-    # print(party_set)

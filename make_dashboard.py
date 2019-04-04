@@ -70,6 +70,14 @@ class VotingHistory(object):
 
 
 def process_division_number(division_number_line:str) -> int:
+    """A unique identifier (index) for a vote.
+    
+    :param division_number_line: Line containing the identifier
+    :type division_number_line: str
+    :return: The indentifier number
+    :rtype: int
+    """
+
     division_number_line = division_number_line.strip()
     match = re.match(r'[^0-9]+([0-9]+).*', division_number_line)
     nr = int(match.group(1))
@@ -77,7 +85,15 @@ def process_division_number(division_number_line:str) -> int:
 
     return nr
 
-def process_division_date(date_line:str):
+def process_division_date(date_line:str) -> datetime.datetime:
+    """Parse the date on which the vote was held from a string
+    
+    :param date_line: line containing the date
+    :type date_line: str
+    :return: Datetime object of the date.
+    :rtype: datetime.datetime
+    """
+
     date_line = date_line.strip()
     datestr = date_line.split(':')[-1].strip()
 
@@ -85,12 +101,30 @@ def process_division_date(date_line:str):
 
     return date
 
-def process_count(count_line:str):
+def process_count(count_line:str) -> int:
+    """Parse the line with the count
+    
+    :param count_line: The line containing the count
+    :type count_line: str
+    :return: The count.
+    :rtype: int
+    """
+
     count_line = count_line.strip()
     count = int(count_line.split(':')[-1].strip())
     return count
 
 def process_votes_to_raw(votes_list:list, division_nr:int) -> dict:
+    """Extracts votes from the voting record
+    
+    :param votes_list: A list containing raw strings from the voting records
+    :type votes_list: list
+    :param division_nr: The index of the voting record
+    :type division_nr: int
+    :return: A dictionary with the individual vote ids as keys and the vote info as values 
+    :rtype: dict
+    """
+
     votes_raw = {}
     for i, vote in enumerate(votes_list):
         vote_id = f"{division_nr:04}_{i+1:03}"

@@ -24,6 +24,10 @@ party_color_map = {'Labour': '#ff00ff' , 'Deputy Speaker': '#e5e500', 'Speaker':
 
 
 class VotingHistory(object):
+    """An object for containing all votes.
+
+    """
+
     def __init__(self, folder:str):
         # self.members_of_parliament = MembersOfParliamentIndex()
         self._load_divisions(folder)
@@ -58,7 +62,14 @@ class VotingHistory(object):
         
             self.divisions[division['division_nr']] = division
 
-    def get_selection_options(self):
+    def get_selection_options(self) -> list:
+        """Returns a list of all votes that are in the list, i.e. all votes a user can choose from
+        
+        :return: A list of all votes.
+        :rtype: list
+        """
+
+
         options = []
         for division_nr, division in self.divisions.items():
             option = {'label': division['title'], 'value': int(division_nr)}

@@ -230,6 +230,7 @@ def remove_loose_nodes(G:nx.Graph) -> None:
 def visualize(G:nx.Graph, remove_empty_nodes:bool = True, layout:str = "spring") -> go.Figure:
     """Generates an interactive plot of a voting network.
 
+    adapted from source: https://plot.ly/python/network-graphs/ 
     :param G: A network as created with the "create_network()" function
     :type G: nx.Graph
     :param remove_empty_nodes: Whether to remove nodes that have no edges: i.e. MEPs that did not vote for any of the bills in the selection, defaults to True
@@ -367,7 +368,7 @@ if __name__ == "__main__":
         dcc.Dropdown(
         id='input',
         options=voting_history.get_selection_options(),
-        value=[441, 393, 392, 391],
+        value=[441, 393, 392, 391],             # Some random votes to initialze the figure.
         multi=True
         ),
         dcc.Graph(id='output')

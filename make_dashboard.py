@@ -104,11 +104,33 @@ def process_votes_to_raw(votes_list:list, division_nr:int) -> dict:
 
     return votes_raw
 
-def has_node(gr, att, val):
+def has_node(gr: nx.Graph, att:str, val:str) -> bool:
+    """Checks whether a node with value (val) for attribute (att) exists in the network.
+    
+    source: https://stackoverflow.com/questions/49103913/check-whether-a-node-exists-in-networkx 
+    :param gr: The graph that needs to be searched
+    :type gr: nx.Graph
+    :param att: What attribute must be searched.
+    :type att: str
+    :param val: What value should the attribute have
+    :type val: str
+    :return: True if the queried node is in the network. False Otherwise.
+    :rtype: bool
+    """
+
     return any([node for node in gr.nodes(data=True) if node[1].get(att, None) == val])
 
-def create_network(voting_history, selection):
+def create_network(voting_history:VotingHistory, selection:list) -> nx.Graph:
+    """Creates a voting network from all votes in voting history that are selected.
     
+    :param voting_history: An object as defined above that contains voting records.
+    :type voting_history: VotingHistory
+    :param selection: A list of numbers (indices) of what votes are selected.
+    :type selection: list
+    :return: A voting graph.
+    :rtype: nx.Graph
+    """
+
 
     print("create network ...", flush = True)
     division_nodemap = {}
@@ -143,7 +165,15 @@ def create_network(voting_history, selection):
 
     return G, division_nodemap, mp_nodemap
 
-def remove_loose_nodes(G):
+def remove_loose_nodes(G:nx.Graph) -> None:
+    """Removes nodes that do not have any edges: i.e. MEPs that did not vote for any of the selected votes
+    
+    :param G: A network as created with the "create_network()" function
+    :type G: nx.Graph
+    :return: Noting. Only mutates the existing graph object.
+    :rtype: None
+    """
+
     to_be_removed = []
     for node in G.nodes():
         if len(G.edges(node)) == 0:

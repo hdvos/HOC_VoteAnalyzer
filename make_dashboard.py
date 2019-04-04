@@ -1,3 +1,6 @@
+# Many credits to pythonprogramming.net for their tutorial series about dash.
+# See for the tutorials: https://pythonprogramming.net/data-visualization-application-dash-python-tutorial-introduction/ 
+
 import os
 import re 
 import datetime
@@ -149,7 +152,21 @@ def remove_loose_nodes(G):
     G.remove_nodes_from(to_be_removed)
 
 
-def visualize(G, remove_empty_nodes = True, layout = "spring"):
+def visualize(G:nx.Graph, remove_empty_nodes:bool = True, layout:str = "spring") -> go.Figure:
+    """Generates an interactive plot of a voting network.
+
+    :param G: A network as created with the "create_network()" function
+    :type G: nx.Graph
+    :param remove_empty_nodes: Whether to remove nodes that have no edges: i.e. MEPs that did not vote for any of the bills in the selection, defaults to True
+    :param remove_empty_nodes: bool, optional
+    :param layout: what layout algorithm should be used. Options are: 'circular', 'random', 'shell', 'spring', 'spectral'. , defaults to "spring"
+    :param layout: str, optional
+    :raises RuntimeError: If an layout option is given that doesnt exist.
+    :return: A plotly figure object containing the plotted network.
+    :rtype: go.Figure
+    """
+
+
     global party_color_map
 
     if remove_empty_nodes:
@@ -259,14 +276,16 @@ def visualize(G, remove_empty_nodes = True, layout = "spring"):
     print("returning figure")
     return fig
 
-app = dash.Dash()
 
 if __name__ == "__main__":
+    app = dash.Dash()
 
-    voting_history = VotingHistory("csv_files")
+    voting_history = VotingHistory("csv_files")             # Voting history is a container for all votes
 
-    options = voting_history.get_selection_options()
-    print(options)
+    options = voting_history.get_selection_options()        # All votes you can choose from.    
+
+    # Define the layout of the app.
+    # Source: https://pythonprogramming.net/vehicle-data-visualization-application-dash-python-tutorial/
     app.layout = html.Div(children = [
         html.Plaintext('Note that the app might be quite slow, you might need to wait a minute for things to happen. Do not select more than 10 votes because this makes it really slow.', className='row',
                     style={'padding-top': '20px'}),
@@ -279,6 +298,8 @@ if __name__ == "__main__":
         dcc.Graph(id='output')
     ])
 
+    # The update function:
+    # Source: https://pythonprogramming.net/dynamic-data-visualization-application-dash-python-tutorial/ 
     @app.callback(
     Output(component_id= 'output', component_property='figure'),
     [Input(component_id='input', component_property='value')])
@@ -292,5 +313,6 @@ if __name__ == "__main__":
         except:
             return "Some Error"
 
+    # Initialize server
     app.run_server(debug=False)
 
